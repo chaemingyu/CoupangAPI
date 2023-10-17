@@ -11,6 +11,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 import pandas as pd
+import pixabay.core
+from Utils import CSV
 
 class CoupangAPI(CommonAPI):
 
@@ -23,6 +25,28 @@ class CoupangAPI(CommonAPI):
     SECRET_KEY = "ac68c2ba170e765c2dd548a2a0dfab6d48a87377"
     _instance = None  # 클래스 레벨에서 정적 변수로 선언
     DRIVER = None
+
+    Category = {
+        "1001" : ["woman","여성패션"],
+        "1002": ["Man", "남성패션"],
+        "1010": ["beauty", "뷰티"],
+        "1011": ["child", "출산/유아동"],
+        "1012": ["food", "식품"],
+        "1013": ["Kitchenware", "주방용품"],
+        "1014": ["Daily Necessity", "생활용품"],
+        "1015": ["home interior", "홈인테리어"],
+        "1016": ["home appliances", "가전디지털"],
+        "1017": ["sports", "스포츠/레저"],
+        "1018": ["vehicle supplies", "자동차용품"],
+        "1019": ["book", "도서/음반/DVD"],
+        "1020": ["Hobby", "완구/취미"],
+        "1021": ["office supplies", "문구/오피스"],
+        "1024": ["health", "헬스/건강식품"],
+        "1025": ["domestic travel", "국내여행"],
+        "1026": ["Overseas Travel", "해외여행"],
+        "1029": ["pet products", "반려동물용품"],
+        "1030": ["infant fashion", "유아동패션"],
+    }
     def __init__(self):
         self.Initialize()
         # pass
@@ -113,17 +137,35 @@ class CoupangAPI(CommonAPI):
         pd.set_option('display.max_rows', None)  # 모든 행 표시
 
         # DataFrame 출력
-        print(df)
+        #print(df)
+        CSV.WriteCsvFile(self.ConvertDataFrame(df))
 
         # 위에서 DataFrame을 생성한 후
-        for index, row in df.iterrows():
-            # index는 행의 인덱스, row는 해당 행의 데이터
-            # 여기서 각 행의 데이터를 원하는 방식으로 처리할 수 있습니다.
-            print("Index:", index)
-            print("productName:", row['productName'])
-            print("productUrl:", str(row['productUrl']))
+        #for index, row in df.iterrows():
 
-            self.DeepLink(row['productUrl'])
+            # print("Index:", index)
+            # print("rank:", row['rank'] )
+            # print("productId:", row['productId'])
+            # print("productName:", row['productName'])
+            # print("productPrice:", row['productPrice'])
+            # print("productImage:", row['productImage'])
+            # print("categoryName:", row['categoryName'])
+            # print("keyword:", row['keyword'])
+            # print("productUrl:", str(row['productUrl']))
+            #self.DeepLink(row['productUrl'])
+            #Utill.GetSumnail(row['keyword'])
+
+            # # 키입력
+            # API_KEY = '40053999-2b85d1718a7ec3f2d658c6ade'
+            # # 발급 받은 API 키를 입력한다.
+            # px = pixabay.core(API_KEY)
+            # image = px.query('sports')
+            #
+            # # 몇 개 검색했는지 나옴
+            # print("{} hits".format(len(image)))
+            #
+            # # 첫 번째 인덱스의 이미지를 다운로드 함.
+            # image[index].download("TEST"+ str(index) + ".jpg", "largeImage")
 
         print("베스트 상품 상세 정보 조회 완료")
 
@@ -175,9 +217,34 @@ class CoupangAPI(CommonAPI):
                                     )
 
         #print(response.json())
-        shorten_urls = [item['shortenUrl'] for item in response.json()['data']]
-        print(shorten_urls)
-        print("단축 링크 생성 완료")
-        return
+        shorten_urls = str([item['shortenUrl'] for item in response.json()['data']])
+        #print(str(shorten_urls))
+        #print("단축 링크 생성 완료")
+        return shorten_urls
 
-        pass
+    def ConvertDataFrame(self,df):
+
+        # 새로운 데이터프레임을 생성합니다.
+        new_df = pd.DataFrame(
+            columns=[ 'rank', 'productId', 'productName', 'productPrice', 'productImage', 'categoryName', 'keyword','productUrl','shortUrl'])
+
+        for index, row in df.iterrows():
+
+            # 각 행의 데이터를 새로운 데이터프레임에 추가합니다.
+            new_row = {
+                #'index': index,
+                'rank': row['rank'],
+                'productId': row['productId'],
+                'productName': row['productName'],
+                'productPrice': row['productPrice'],
+                'productImage': row['productImage'],
+                'categoryName': row['categoryName'],
+                'keyword': row['keyword'],
+                'productUrl': str(row['productUrl']),
+                'shortUrl': self.DeepLink(row['productUrl'])
+
+            }
+
+            new_df = pd.concat([new_df, pd.DataFrame([new_row])], ignore_index=True)
+
+        return new_df
