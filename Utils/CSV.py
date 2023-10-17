@@ -9,8 +9,8 @@ def ReadCsvFile():
     encoding = 'utf-8'  # 한글 깨질 경우 인코딩에 맞게 입력
     return df
 
-def WriteCsvFile(df):
+def WriteCsvFile(df, title):
 
-    pd.DataFrame(df).to_csv('Test.csv', header=False, index=False, encoding='cp949')
+    pd.DataFrame(df).to_csv(title +'.csv', header=False, index=False, encoding='cp949')
 
     pass

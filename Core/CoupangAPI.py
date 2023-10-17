@@ -30,18 +30,18 @@ class CoupangAPI(CommonAPI):
         "1001" : ["woman","여성패션"],
         "1002": ["Man", "남성패션"],
         "1010": ["beauty", "뷰티"],
-        "1011": ["child", "출산/유아동"],
+        "1011": ["child", "출산_유아동"],
         "1012": ["food", "식품"],
         "1013": ["Kitchenware", "주방용품"],
         "1014": ["Daily Necessity", "생활용품"],
         "1015": ["home interior", "홈인테리어"],
         "1016": ["home appliances", "가전디지털"],
-        "1017": ["sports", "스포츠/레저"],
+        "1017": ["sports", "스포츠_레저"],
         "1018": ["vehicle supplies", "자동차용품"],
-        "1019": ["book", "도서/음반/DVD"],
-        "1020": ["Hobby", "완구/취미"],
-        "1021": ["office supplies", "문구/오피스"],
-        "1024": ["health", "헬스/건강식품"],
+        "1019": ["book", "도서_음반_DVD"],
+        "1020": ["Hobby", "완구_취미"],
+        "1021": ["office supplies", "문구_오피스"],
+        "1024": ["health", "헬스_건강식품"],
         "1025": ["domestic travel", "국내여행"],
         "1026": ["Overseas Travel", "해외여행"],
         "1029": ["pet products", "반려동물용품"],
@@ -115,30 +115,38 @@ class CoupangAPI(CommonAPI):
 
     #카테고리별 베스트 상품 상세 정보
     def BestCategory(self):
-        Limit = 10
-        CategoryId = 1017
 
-        #API 호출
-        self.REQUEST_METHOD = "GET"
-        self.URL = "/v2/providers/affiliate_open_api/apis/openapi/products/bestcategories/" +  str(CategoryId) + "?limit=" + str(Limit)
+        for category_code, category_info in self.Category.items():
+            # 카테고리 코드와 설명을 추출합니다.
+            code, description = category_info
 
-        authorization = self.GetAuthorization()
-        url = "{}{}".format(self.DOMAIN, self.URL)
-        response = requests.request(method=self.REQUEST_METHOD, url=url, headers={"Authorization": authorization,
-                                                                                  "Content-Type": "application/json;charset=UTF-8"})
-        retdata = json.dumps(response.json(), indent=4).encode('utf-8')
-        jsondata = json.loads(retdata)
-        #print(jsondata['data'])
+            Limit = 10
+            #CategoryId = 1017
 
-        # Pandas DataFrame으로 변환
-        df = pd.DataFrame(jsondata['data'])
-        # 모든 행과 열 표시
-        pd.set_option('display.max_columns', None)  # 모든 열 표시
-        pd.set_option('display.max_rows', None)  # 모든 행 표시
+            #API 호출
+            self.REQUEST_METHOD = "GET"
+            self.URL = "/v2/providers/affiliate_open_api/apis/openapi/products/bestcategories/" +  category_code + "?limit=" + str(Limit)
 
-        # DataFrame 출력
-        #print(df)
-        CSV.WriteCsvFile(self.ConvertDataFrame(df))
+            authorization = self.GetAuthorization()
+            url = "{}{}".format(self.DOMAIN, self.URL)
+            response = requests.request(method=self.REQUEST_METHOD, url=url, headers={"Authorization": authorization,
+                                                                                      "Content-Type": "application/json;charset=UTF-8"})
+            retdata = json.dumps(response.json(), indent=4).encode('utf-8')
+            jsondata = json.loads(retdata)
+         #print(jsondata['data'])
+
+            # Pandas DataFrame으로 변환
+            df = pd.DataFrame(jsondata['data'])
+            #api 사용 횟수 초과 예외 출력
+
+
+            # 모든 행과 열 표시
+            pd.set_option('display.max_columns', None)  # 모든 열 표시
+            pd.set_option('display.max_rows', None)  # 모든 행 표시
+
+            # DataFrame 출력
+            #print(df)
+            CSV.WriteCsvFile(self.ConvertDataFrame(df), str(description))
 
         # 위에서 DataFrame을 생성한 후
         #for index, row in df.iterrows():
