@@ -1,3 +1,4 @@
+import os
 import hmac
 import hashlib
 import requests
@@ -6,14 +7,14 @@ from time import gmtime, strftime
 import urllib.request
 from urllib.parse import urlencode
 from Common.CommonAPI import CommonAPI
-
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 import pandas as pd
 import pixabay.core
 from Utils import CSV
-
+import Common
 class CoupangAPI(CommonAPI):
 
     REQUEST_METHOD = None
@@ -146,7 +147,13 @@ class CoupangAPI(CommonAPI):
 
             # DataFrame 출력
             #print(df)
-            CSV.WriteCsvFile(self.ConvertDataFrame(df), str(description))
+
+            # 경로생성
+            file_path = '/result/' + datetime.now().strftime("%Y%m%d%H%M%S")
+            Common.createFolder(file_path)
+
+            CSV.WriteCsvFile(self.ConvertDataFrame(df), file_path + '/' + str(description))
+
 
         # 위에서 DataFrame을 생성한 후
         #for index, row in df.iterrows():
@@ -256,3 +263,6 @@ class CoupangAPI(CommonAPI):
             new_df = pd.concat([new_df, pd.DataFrame([new_row])], ignore_index=True)
 
         return new_df
+
+
+
