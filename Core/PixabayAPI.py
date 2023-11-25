@@ -1,6 +1,5 @@
 import pixabay.core
-from PIL import Image
-from Common.CommonAPI import CommonAPI
+from Core.CommonAPI import CommonAPI
 
 class PixabayAPI(CommonAPI):
 

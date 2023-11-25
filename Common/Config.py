@@ -1,4 +1,4 @@
-Category = {
+ShoppingCategory = {
     "1001": ["woman", "여성패션"],
     "1002": ["Man", "남성패션"],
     "1010": ["beauty", "뷰티"],

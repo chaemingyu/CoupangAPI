@@ -6,15 +6,14 @@ import json
 from time import gmtime, strftime
 import urllib.request
 from urllib.parse import urlencode
-from Common.CommonAPI import CommonAPI
+from Core.CommonAPI import CommonAPI
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
 import pandas as pd
-import pixabay.core
-from Utils import CSV
-import Common
+from Utils import  CommonUtils, CSVManager
+from Common import  Config
+
 class CoupangAPI(CommonAPI):
 
     REQUEST_METHOD = None
@@ -26,28 +25,8 @@ class CoupangAPI(CommonAPI):
     SECRET_KEY = "ac68c2ba170e765c2dd548a2a0dfab6d48a87377"
     _instance = None  # 클래스 레벨에서 정적 변수로 선언
     DRIVER = None
-
-    Category = {
-        "1001" : ["woman","여성패션"],
-        "1002": ["Man", "남성패션"],
-        "1010": ["beauty", "뷰티"],
-        "1011": ["child", "출산_유아동"],
-        "1012": ["food", "식품"],
-        "1013": ["Kitchenware", "주방용품"],
-        "1014": ["Daily Necessity", "생활용품"],
-        "1015": ["home interior", "홈인테리어"],
-        "1016": ["home appliances", "가전디지털"],
-        "1017": ["sports", "스포츠_레저"],
-        "1018": ["vehicle supplies", "자동차용품"],
-        "1019": ["book", "도서_음반_DVD"],
-        "1020": ["Hobby", "완구_취미"],
-        "1021": ["office supplies", "문구_오피스"],
-        "1024": ["health", "헬스_건강식품"],
-        "1025": ["domestic travel", "국내여행"],
-        "1026": ["Overseas Travel", "해외여행"],
-        "1029": ["pet products", "반려동물용품"],
-        "1030": ["infant fashion", "유아동패션"],
-    }
+    Category = Config.ShoppingCategory
+    file_path = ""
     def __init__(self):
         self.Initialize()
         # pass
@@ -68,9 +47,19 @@ class CoupangAPI(CommonAPI):
         # Chrome 웹 드라이버 초기화
         self.DRIVER = webdriver.Chrome(options=chrome_options)
 
+        # 현재 스크립트 파일의 경로를 가져옵니다.
+        path =   os.path.dirname(__file__)
+        current_directory = os.path.dirname(path)
+        # 결과 폴더를 생성할 경로 설정 (현재 스크립트 파일의 위치를 기준으로)
+        self.file_path = os.path.join(current_directory, 'result', datetime.now().strftime("%Y%m%d%H%M%S"))
+
+        # 경로생성
+        # file_path = '/result/' + datetime.now().strftime("%Y%m%d%H%M%S")
+        CommonUtils.CreateFolder(self.file_path)
+
         print("쿠팡API 초기화 완료")
 
-        self.BestCategory()
+        self.SelectBestCategory("1001")
 
         pass
 
@@ -114,8 +103,42 @@ class CoupangAPI(CommonAPI):
 
         pass
 
+    #카테고리별 베스트 상품 상세 정보 선택
+    def SelectBestCategory(self, category_code):
+
+        try:
+            category_info = self.Category.get(category_code)
+            code, description = category_info
+
+            Limit = 10
+            #CategoryId = 1017
+
+            #API 호출
+            self.REQUEST_METHOD = "GET"
+            self.URL = "/v2/providers/affiliate_open_api/apis/openapi/products/bestcategories/" +  category_code + "?limit=" + str(Limit)
+
+            authorization = self.GetAuthorization()
+            url = "{}{}".format(self.DOMAIN, self.URL)
+            response = requests.request(method=self.REQUEST_METHOD, url=url, headers={"Authorization": authorization,
+                                                                                      "Content-Type": "application/json;charset=UTF-8"})
+            retdata = json.dumps(response.json(), indent=4).encode('utf-8')
+            jsondata = json.loads(retdata)
+            #print(jsondata['data'])
+
+            # Pandas DataFrame으로 변환
+            df = pd.DataFrame(jsondata['data'])
+            #api 사용 횟수 초과 예외 출력
+
+            CSVManager.WriteCsvFile(self.ConvertDataFrame(df), self.file_path + '/' + str(description))
+
+        except OSError:
+            print('Error: Creating directory. ')
+
+
+
     #카테고리별 베스트 상품 상세 정보
-    def BestCategory(self):
+    def SelectAllBestCategory(self):
+
 
         for category_code, category_info in self.Category.items():
             # 카테고리 코드와 설명을 추출합니다.
@@ -134,7 +157,7 @@ class CoupangAPI(CommonAPI):
                                                                                       "Content-Type": "application/json;charset=UTF-8"})
             retdata = json.dumps(response.json(), indent=4).encode('utf-8')
             jsondata = json.loads(retdata)
-         #print(jsondata['data'])
+            #print(jsondata['data'])
 
             # Pandas DataFrame으로 변환
             df = pd.DataFrame(jsondata['data'])
@@ -142,46 +165,13 @@ class CoupangAPI(CommonAPI):
 
 
             # 모든 행과 열 표시
-            pd.set_option('display.max_columns', None)  # 모든 열 표시
-            pd.set_option('display.max_rows', None)  # 모든 행 표시
+            # pd.set_option('display.max_columns', None)  # 모든 열 표시
+            # pd.set_option('display.max_rows', None)  # 모든 행 표시
 
             # DataFrame 출력
             #print(df)
 
-            # 경로생성
-            file_path = '/result/' + datetime.now().strftime("%Y%m%d%H%M%S")
-            Common.createFolder(file_path)
-
-            CSV.WriteCsvFile(self.ConvertDataFrame(df), file_path + '/' + str(description))
-
-
-        # 위에서 DataFrame을 생성한 후
-        #for index, row in df.iterrows():
-
-            # print("Index:", index)
-            # print("rank:", row['rank'] )
-            # print("productId:", row['productId'])
-            # print("productName:", row['productName'])
-            # print("productPrice:", row['productPrice'])
-            # print("productImage:", row['productImage'])
-            # print("categoryName:", row['categoryName'])
-            # print("keyword:", row['keyword'])
-            # print("productUrl:", str(row['productUrl']))
-            #self.DeepLink(row['productUrl'])
-            #Utill.GetSumnail(row['keyword'])
-
-            # # 키입력
-            # API_KEY = '40053999-2b85d1718a7ec3f2d658c6ade'
-            # # 발급 받은 API 키를 입력한다.
-            # px = pixabay.core(API_KEY)
-            # image = px.query('sports')
-            #
-            # # 몇 개 검색했는지 나옴
-            # print("{} hits".format(len(image)))
-            #
-            # # 첫 번째 인덱스의 이미지를 다운로드 함.
-            # image[index].download("TEST"+ str(index) + ".jpg", "largeImage")
-
+            CSVManager.WriteCsvFile(self.ConvertDataFrame(df), self.file_path + '/' + str(description))
         print("베스트 상품 상세 정보 조회 완료")
 
     # 쿠팡 상세 상품 정보 검색
