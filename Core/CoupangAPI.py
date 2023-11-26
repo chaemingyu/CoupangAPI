@@ -1,3 +1,4 @@
+import cv2
 import os
 import hmac
 import hashlib
@@ -5,6 +6,8 @@ import requests
 import json
 from time import gmtime, strftime
 import urllib.request
+import numpy as np
+from io import BytesIO
 from urllib.parse import urlencode
 from Core.CommonAPI import CommonAPI
 from datetime import datetime
@@ -13,6 +16,8 @@ from selenium.webdriver.chrome.options import Options
 import pandas as pd
 from Utils import  CommonUtils, CSVManager
 from Common import  Config
+from PIL import Image, ImageDraw, ImageFont
+import matplotlib.pyplot as plt
 
 class CoupangAPI(CommonAPI):
 
@@ -47,20 +52,11 @@ class CoupangAPI(CommonAPI):
         # Chrome 웹 드라이버 초기화
         self.DRIVER = webdriver.Chrome(options=chrome_options)
 
-        # 현재 스크립트 파일의 경로를 가져옵니다.
-        path =   os.path.dirname(__file__)
-        current_directory = os.path.dirname(path)
-        # 결과 폴더를 생성할 경로 설정 (현재 스크립트 파일의 위치를 기준으로)
-        self.file_path = os.path.join(current_directory, 'result', datetime.now().strftime("%Y%m%d%H%M%S"))
-
-        # 경로생성
-        # file_path = '/result/' + datetime.now().strftime("%Y%m%d%H%M%S")
-        CommonUtils.CreateFolder(self.file_path)
 
         print("쿠팡API 초기화 완료")
 
-        self.SelectBestCategory("1001")
-
+        # self.SelectBestCategory("1001")
+        self.WirteImage()
         pass
 
     # HMAC 서명 생성 및 API 호출
@@ -105,6 +101,16 @@ class CoupangAPI(CommonAPI):
 
     #카테고리별 베스트 상품 상세 정보 선택
     def SelectBestCategory(self, category_code):
+
+        # 현재 스크립트 파일의 경로를 가져옵니다.
+        path =   os.path.dirname(__file__)
+        current_directory = os.path.dirname(path)
+        # 결과 폴더를 생성할 경로 설정 (현재 스크립트 파일의 위치를 기준으로)
+        self.file_path = os.path.join(current_directory, 'result', datetime.now().strftime("%Y%m%d%H%M%S"))
+
+        # 경로생성
+        # file_path = '/result/' + datetime.now().strftime("%Y%m%d%H%M%S")
+        CommonUtils.CreateFolder(self.file_path)
 
         try:
             category_info = self.Category.get(category_code)
@@ -255,4 +261,66 @@ class CoupangAPI(CommonAPI):
         return new_df
 
 
+    def GetImage(self, imgurl):
+        value = imgurl  # 이미지 가져오기
+        background_image = cv2.imread('res/Template1.png')
+        # 이미지 다운로드
+        response = requests.get(value)
+
+        if response.status_code == 200:
+            # 이미지를 바이트 데이터로 변환
+            image_data = BytesIO(response.content)
+            # 바이트 데이터를 NumPy 배열로 변환
+            np_array = np.frombuffer(image_data.read(), np.uint8)
+            # OpenCV로 이미지 읽기
+            insert_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+            insert_image = cv2.resize(insert_image, (300, 300))
+
+            insert_height, insert_width, _ = insert_image.shape
+            background_height, background_width, _ = background_image.shape
+
+            # 삽입할 이미지가 배경 이미지의 특정 위치에 들어가게 조정합니다.
+            x_position = 900  # 삽입 위치의 x 좌표
+            y_position = 100  # 삽입 위치의 y 좌표
+
+            # 삽입할 이미지를 배경 이미지에 복사합니다.
+            background_image[y_position:y_position + insert_height, x_position:x_position + insert_width] = insert_image
+
+            # 이미지를 다시 OpenCV 형식으로 변환
+            # background_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+        return background_image
+        # 이미지 바로 보는 용도
+        # plt.imshow(cv2.cvtColor(background_image, cv2.COLOR_BGR2RGB))
+        # plt.show()
+
+    def WirteImage(self):
+
+        csv = CSVManager.ReadCsvFile('D:\CoupangAPI\result\20231125171008')
+
+        for index, row in csv.iterrows():
+            TemplateImage = self.GetImage(row['5'])
+
+            # Pillow를 사용하여 이미지에 텍스트 추가
+            image = Image.fromarray(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
+            draw = ImageDraw.Draw(image)
+
+            # 텍스트를 추가할 위치와 내용을 리스트로 정의
+            text_info_list = [
+                {'text': row['3'], 'position': (300, 300), 'font': "Fonts/NanumGangBuJangNimCe.ttf"},
+                {'text': str(row['2']), 'position': (300, 400), 'font': "Fonts/NanumGangBuJangNimCe.ttf"}
+            ]
+
+            # 모든 텍스트 추가
+            for text_info in text_info_list:
+                text = text_info['text']
+                position = text_info['position']
+                font = ImageFont.truetype(text_info['font'], 36)
+                draw.text(position, text, fill="black", font=font)
+
+            # 이미지를 다시 OpenCV 형식으로 변환
+            TemplateImage = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+            # 이미지 바로 보는 용도
+            # plt.imshow(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
+            # plt.show()
 
