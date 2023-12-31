@@ -1,0 +1,7 @@
+﻿.idea/inspectionProfiles
+.idea
+Common/__pycache__
+Core/__pycache__
+Lib
+pyvenv.cfg
+Scripts

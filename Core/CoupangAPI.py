@@ -12,12 +12,13 @@ from urllib.parse import urlencode
 from Core.CommonAPI import CommonAPI
 from datetime import datetime
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
 from Utils import  CommonUtils, CSVManager
 from Common import  Config
 from PIL import Image, ImageDraw, ImageFont
-import matplotlib.pyplot as plt
+
 
 class CoupangAPI(CommonAPI):
 
@@ -43,20 +44,25 @@ class CoupangAPI(CommonAPI):
         return CoupangAPI._instance
 
     def Initialize(self):
-        #self.ConnectAPI()
+        try:
+            # self.ConnectAPI()
 
-        # Chrome 옵션 초기화
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # 브라우저를 표시하지 않고 백그라운드에서 실행
+            # Chrome 옵션 초기화
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")  # 브라우저를 표시하지 않고 백그라운드에서 실행
 
-        # Chrome 웹 드라이버 초기화
-        self.DRIVER = webdriver.Chrome(options=chrome_options)
+            # Chrome 웹 드라이버 초기화 - ChromeDriverManager를 이용하여 자동으로 최신 버전의 chromedriver 다운로드
+            driver_path = ChromeDriverManager().install()
+            self.DRIVER = webdriver.Chrome(driver_path, options=chrome_options)
+
+        except Exception as e:
+            print(f'Initialize 에러 발생: {e}')
 
 
-        print("쿠팡API 초기화 완료")
+
 
         # self.SelectBestCategory("1001")
-        self.WirteImage()
+        # self.WirteImage()
         pass
 
     # HMAC 서명 생성 및 API 호출
@@ -77,24 +83,24 @@ class CoupangAPI(CommonAPI):
 
     def ConnectAPI(self):
         #API 호출
-        # self.REQUEST_METHOD = "POST"
-        # self.URL = "/v2/providers/affiliate_open_api/apis/openapi/v1/deeplink"
-        #
-        # self.REQUEST = {"coupangUrls": [
-        #     "https://www.coupang.com/np/search?component=&q=good&channel=user",
-        #     "https://www.coupang.com/np/coupangglobal"
-        # ]}
-        #
-        # authorization = self.GetAuthorization()
-        # url = "{}{}".format(self.DOMAIN, self.URL)
-        # response = requests.request(method=self.REQUEST_METHOD, url=url,
-        #                             headers={
-        #                                 "Authorization": authorization,
-        #                                 "Content-Type": "application/json"
-        #                             },
-        #                             data=json.dumps(self.REQUEST)
-        #                             )
-        # print(response.json())
+        self.REQUEST_METHOD = "POST"
+        self.URL = "/v2/providers/affiliate_open_api/apis/openapi/v1/deeplink"
+
+        self.REQUEST = {"coupangUrls": [
+            "https://www.coupang.com/np/search?component=&q=good&channel=user",
+            "https://www.coupang.com/np/coupangglobal"
+        ]}
+
+        authorization = self.GetAuthorization()
+        url = "{}{}".format(self.DOMAIN, self.URL)
+        response = requests.request(method=self.REQUEST_METHOD, url=url,
+                                    headers={
+                                        "Authorization": authorization,
+                                        "Content-Type": "application/json"
+                                    },
+                                    data=json.dumps(self.REQUEST)
+                                    )
+        print(response.json())
         print("쿠팡API 연결 완료")
 
         pass
