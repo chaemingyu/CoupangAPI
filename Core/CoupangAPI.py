@@ -270,7 +270,16 @@ class CoupangAPI(CommonAPI):
 
     def GetImage(self, imgurl):
         value = imgurl  # 이미지 가져오기
-        background_image = cv2.imread('res/Template1.png')
+
+        # 현재 스크립트 파일의 경로를 얻습니다.
+        script_dir = os.path.dirname(__file__)
+
+        # res 폴더의 부모 디렉토리로 이동하여 이미지 파일의 상대 경로 설정
+        image_path = os.path.join(script_dir, '..', 'res', 'Template1.png')
+
+        # 이미지 파일을 불러오기
+        background_image = cv2.imread(image_path)
+
         # 이미지 다운로드
         response = requests.get(value)
 
@@ -307,6 +316,9 @@ class CoupangAPI(CommonAPI):
         root.withdraw()  # tkinter 창 숨기기
 
         file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        # 이미지를 저장할 디렉토리 경로 추출
+        output_directory = os.path.dirname(file_path)
+
         if file_path:
 
             csv = CSVManager.ReadCsvFile(file_path)
@@ -318,10 +330,18 @@ class CoupangAPI(CommonAPI):
                 image = Image.fromarray(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
                 draw = ImageDraw.Draw(image)
 
+                # 현재 스크립트 파일의 경로를 얻습니다.
+                script_dir = os.path.dirname(__file__)
+
+                # res 폴더의 부모 디렉토리로 이동하여 이미지 파일의 상대 경로 설정
+                fonts_path = os.path.join(script_dir, '..', 'fonts')
+
                 # 텍스트를 추가할 위치와 내용을 리스트로 정의
                 text_info_list = [
-                    {'text': row['3'], 'position': (300, 300), 'font': "Fonts/NanumGangBuJangNimCe.ttf"},
-                    {'text': str(row['2']), 'position': (300, 400), 'font': "Fonts/NanumGangBuJangNimCe.ttf"}
+                    {'text': row['3'], 'position': (300, 300),
+                     'font': os.path.join(fonts_path, 'NanumGangBuJangNimCe.ttf')},
+                    {'text': str(row['2']), 'position': (300, 400),
+                     'font': os.path.join(fonts_path, 'NanumGangBuJangNimCe.ttf')}
                 ]
 
                 # 모든 텍스트 추가
@@ -334,11 +354,9 @@ class CoupangAPI(CommonAPI):
                 # 이미지를 다시 OpenCV 형식으로 변환
                 TemplateImage = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
+                # 이미지 저장 파일명 및 경로 설정
+                output_image_path = os.path.join(output_directory, f"output_{index}.png")
                 # 이미지 저장
-                output_image_path = f"output_{index}.png"  # 저장할 이미지 경로 및 파일명
                 cv2.imwrite(output_image_path, TemplateImage)
 
-                # 이미지 바로 보는 용도
-                # plt.imshow(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
-                # plt.show()
 
