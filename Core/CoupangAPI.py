@@ -290,13 +290,13 @@ class CoupangAPI(CommonAPI):
             np_array = np.frombuffer(image_data.read(), np.uint8)
             # OpenCV로 이미지 읽기
             insert_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-            insert_image = cv2.resize(insert_image, (300, 300))
+            insert_image = cv2.resize(insert_image, (900, 900))
 
             insert_height, insert_width, _ = insert_image.shape
             background_height, background_width, _ = background_image.shape
 
             # 삽입할 이미지가 배경 이미지의 특정 위치에 들어가게 조정합니다.
-            x_position = 900  # 삽입 위치의 x 좌표
+            x_position = 800  # 삽입 위치의 x 좌표
             y_position = 100  # 삽입 위치의 y 좌표
 
             # 삽입할 이미지를 배경 이미지에 복사합니다.
@@ -338,18 +338,36 @@ class CoupangAPI(CommonAPI):
 
                 # 텍스트를 추가할 위치와 내용을 리스트로 정의
                 text_info_list = [
-                    {'text': row['3'], 'position': (300, 300),
-                     'font': os.path.join(fonts_path, 'NanumGangBuJangNimCe.ttf')},
-                    {'text': str(row['2']), 'position': (300, 400),
-                     'font': os.path.join(fonts_path, 'NanumGangBuJangNimCe.ttf')}
+                    # 랭킹
+                    {'text': str(row['1']) + '위',
+                     'position': (1600,50),
+                     'font': os.path.join(fonts_path, 'GmarketSansTTFBold.ttf'),
+                     'font-size': 99,
+                     'font-color': 'white'
+                    },
+                    # 제품명
+                    {'text': str(row['2']),
+                     'position': (1000, 800),
+                     'font': os.path.join(fonts_path, 'GmarketSansTTFMedium.ttf'),
+                     'font-size': 60,
+                     'font-color': 'white'
+                     },
+                    # 가격
+                    {'text': str(row['3']) + '원',
+                     'position': (1600, 1040),
+                     'font': os.path.join(fonts_path, 'GmarketSansTTFMedium.ttf'),
+                     'font-size': 50,
+                     'font-color': 'white'
+                     },
+
                 ]
 
                 # 모든 텍스트 추가
                 for text_info in text_info_list:
                     text = text_info['text']
                     position = text_info['position']
-                    font = ImageFont.truetype(text_info['font'], 36)
-                    draw.text(position, text, fill="black", font=font)
+                    font = ImageFont.truetype(text_info['font'], text_info['font-size'])
+                    draw.text(position, text, fill=text_info['font-color'], font=font)
 
                 # 이미지를 다시 OpenCV 형식으로 변환
                 TemplateImage = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
