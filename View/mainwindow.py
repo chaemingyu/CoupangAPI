@@ -4,8 +4,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 import Common
 from Core.CoupangAPI import CoupangAPI  # Core 패키지 내의 CoupangAPI 모듈을 가져옵니다.
-
+from PyQt5.QtCore import QStringListModel, QModelIndex,Qt
 class MainWindow(QMainWindow):
+
+    category = None
 
     def __init__(self):
         super().__init__()
@@ -21,6 +23,12 @@ class MainWindow(QMainWindow):
 
         self.ShoppingCategorymodel = QStandardItemModel()
 
+        # Column Names
+        column_names = ["Key", "영문 카테고리", "한글 카테고리"]
+
+        # Set Column Headers
+
+        self.ShoppingCategorymodel.setHorizontalHeaderLabels(column_names)
         # ShoppingCategory 딕셔너리 순회하며 모델에 아이템 추가
         for key, value in Common.Config.ShoppingCategory.items():
             key_item = QStandardItem(str(key))  # key
@@ -28,11 +36,15 @@ class MainWindow(QMainWindow):
             value_1_item = QStandardItem(str(value[1]))  # value[1]
 
             # 모델에 각 항목을 추가
-            self.ShoppingCategorymodel.appendRow([value_1_item, key_item, value_0_item])
+            self.ShoppingCategorymodel.appendRow([key_item, value_0_item, value_1_item])
             # self.ShoppingCategorymodel.appendRow( value_0_item)
             # self.ShoppingCategorymodel.appendRow(value_1_item)
 
-        self.shoppinglistView.setModel(self.ShoppingCategorymodel)
+        self.shoppingtableView.setModel(self.ShoppingCategorymodel)
+        # self.tableView.setModel(self.ShoppingCategorymodel)
+
+        # 리스트뷰의 아이템 클릭 이벤트 핸들러 연결
+        self.shoppingtableView.clicked.connect(self.onTableClicked)
 
     def IniBtnClick(self):
         self.coupang = CoupangAPI.GetInstance()
@@ -41,13 +53,27 @@ class MainWindow(QMainWindow):
         pass
 
     def SerachBtnClick(self):
-        self.coupang.SelectBestCategory("1001")
+        if self.category is not None:
+            cell_text = self.category.text()  # 클릭된 셀의 텍스트 가져오기
+            # print(f"Clicked row: {row}, column: {column}, value: {cell_text}")
+
+        self.coupang.SelectBestCategory(cell_text)
+        self.Append_log("조회 완료")
         #self.coupang.ConnectAPI()
         pass
 
     def Append_log(self, log):
         # 로그 텍스트를 추가하는 메서드
         self.log.append(log)
+
+    # 리스트뷰 클릭 이벤트 핸들러
+    def onTableClicked(self, index):
+        row = index.row()  # 클릭된 행의 인덱스 가져오기
+        column = 0  # 클릭된 열의 인덱스 가져오기
+
+        self.category = self.ShoppingCategorymodel.item(row, column)  # 클릭된 셀의 아이템 가져오기
+
+
 
 if __name__ == "__main__":
     # coupang = CoupangAPI.GetInstance()
