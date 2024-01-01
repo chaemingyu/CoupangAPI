@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 def ReadCsvFile(file_path):
-    file_path = r'D:\CoupangAPI\result\20231125171008\여성패션.csv'
+    # file_path = r'D:\CoupangAPI\result\20231125171008\여성패션.csv'
 
     # file_path = os.path.join(file_path, '여성패션.csv')
     df = pd.read_csv(file_path, encoding='cp949', names = ['1','2','3','4','5','6','7','8','9'])

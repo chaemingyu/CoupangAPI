@@ -18,7 +18,8 @@ import pandas as pd
 from Utils import  CommonUtils, CSVManager
 from Common import  Config
 from PIL import Image, ImageDraw, ImageFont
-
+import tkinter as tk
+from tkinter import filedialog
 
 class CoupangAPI(CommonAPI):
 
@@ -300,33 +301,44 @@ class CoupangAPI(CommonAPI):
         # plt.imshow(cv2.cvtColor(background_image, cv2.COLOR_BGR2RGB))
         # plt.show()
 
-    def WirteImage(self):
+    def CreateImage(self):
 
-        csv = CSVManager.ReadCsvFile('D:\CoupangAPI\result\20231125171008')
+        root = tk.Tk()
+        root.withdraw()  # tkinter 창 숨기기
 
-        for index, row in csv.iterrows():
-            TemplateImage = self.GetImage(row['5'])
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if file_path:
 
-            # Pillow를 사용하여 이미지에 텍스트 추가
-            image = Image.fromarray(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
-            draw = ImageDraw.Draw(image)
+            csv = CSVManager.ReadCsvFile(file_path)
 
-            # 텍스트를 추가할 위치와 내용을 리스트로 정의
-            text_info_list = [
-                {'text': row['3'], 'position': (300, 300), 'font': "Fonts/NanumGangBuJangNimCe.ttf"},
-                {'text': str(row['2']), 'position': (300, 400), 'font': "Fonts/NanumGangBuJangNimCe.ttf"}
-            ]
+            for index, row in csv.iterrows():
+                TemplateImage = self.GetImage(row['5'])
 
-            # 모든 텍스트 추가
-            for text_info in text_info_list:
-                text = text_info['text']
-                position = text_info['position']
-                font = ImageFont.truetype(text_info['font'], 36)
-                draw.text(position, text, fill="black", font=font)
+                # Pillow를 사용하여 이미지에 텍스트 추가
+                image = Image.fromarray(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
+                draw = ImageDraw.Draw(image)
 
-            # 이미지를 다시 OpenCV 형식으로 변환
-            TemplateImage = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-            # 이미지 바로 보는 용도
-            # plt.imshow(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
-            # plt.show()
+                # 텍스트를 추가할 위치와 내용을 리스트로 정의
+                text_info_list = [
+                    {'text': row['3'], 'position': (300, 300), 'font': "Fonts/NanumGangBuJangNimCe.ttf"},
+                    {'text': str(row['2']), 'position': (300, 400), 'font': "Fonts/NanumGangBuJangNimCe.ttf"}
+                ]
+
+                # 모든 텍스트 추가
+                for text_info in text_info_list:
+                    text = text_info['text']
+                    position = text_info['position']
+                    font = ImageFont.truetype(text_info['font'], 36)
+                    draw.text(position, text, fill="black", font=font)
+
+                # 이미지를 다시 OpenCV 형식으로 변환
+                TemplateImage = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+                # 이미지 저장
+                output_image_path = f"output_{index}.png"  # 저장할 이미지 경로 및 파일명
+                cv2.imwrite(output_image_path, TemplateImage)
+
+                # 이미지 바로 보는 용도
+                # plt.imshow(cv2.cvtColor(TemplateImage, cv2.COLOR_BGR2RGB))
+                # plt.show()
 
