@@ -47,8 +47,11 @@ class MainWindow(QMainWindow):
         # 리스트뷰의 아이템 클릭 이벤트 핸들러 연결
         self.shoppingtableView.clicked.connect(self.onTableClicked)
 
-    def IniBtnClick(self):
         self.coupang = CoupangAPI.GetInstance()
+
+    def IniBtnClick(self):
+
+        self.coupang.Initialize()
         self.Append_log("쿠팡API 초기화 완료")
         # print("쿠팡API 초기화 완료")
         pass

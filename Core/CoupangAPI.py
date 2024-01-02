@@ -35,8 +35,8 @@ class CoupangAPI(CommonAPI):
     Category = Config.ShoppingCategory
     file_path = ""
     def __init__(self):
-        self.Initialize()
-        # pass
+        # self.Initialize()
+        pass
 
     @staticmethod
     def GetInstance():
@@ -290,7 +290,7 @@ class CoupangAPI(CommonAPI):
             np_array = np.frombuffer(image_data.read(), np.uint8)
             # OpenCV로 이미지 읽기
             insert_image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-            insert_image = cv2.resize(insert_image, (900, 900))
+            insert_image = cv2.resize(insert_image, (1000, 900))
 
             insert_height, insert_width, _ = insert_image.shape
             background_height, background_width, _ = background_image.shape
@@ -336,30 +336,53 @@ class CoupangAPI(CommonAPI):
                 # res 폴더의 부모 디렉토리로 이동하여 이미지 파일의 상대 경로 설정
                 fonts_path = os.path.join(script_dir, '..', 'fonts')
 
+                text = str(row['3'])
+                formatted_text = ''
+                word = ''
+
+                for char in text:
+                    if char == ' ':
+                        if len(word) >= 10:
+                            formatted_text += '\n'
+                        formatted_text += word + ' '
+                        word = ''
+                    else:
+                        word += char
+
+                if len(word) >= 10:
+                    formatted_text += '\n'
+                formatted_text += word
+
                 # 텍스트를 추가할 위치와 내용을 리스트로 정의
                 text_info_list = [
                     # 랭킹
                     {'text': str(row['1']) + '위',
-                     'position': (1600,50),
+                     'position': (80,360),
                      'font': os.path.join(fonts_path, 'GmarketSansTTFBold.ttf'),
-                     'font-size': 99,
-                     'font-color': 'white'
+                     'font-size': 180,
+                     'font-color': 'black'
                     },
                     # 제품명
-                    {'text': str(row['2']),
-                     'position': (1000, 800),
-                     'font': os.path.join(fonts_path, 'GmarketSansTTFMedium.ttf'),
-                     'font-size': 60,
-                     'font-color': 'white'
+                    {'text': str(row['3']),
+                     'position': (100, 620),
+                     'font': os.path.join(fonts_path, 'GmarketSansTTFBold.ttf'),
+                     'font-size': 70,
+                     'font-color': '#00FE67'
                      },
                     # 가격
-                    {'text': str(row['3']) + '원',
-                     'position': (1600, 1040),
-                     'font': os.path.join(fonts_path, 'GmarketSansTTFMedium.ttf'),
-                     'font-size': 50,
-                     'font-color': 'white'
+                    {'text': str(row['4']) + '원',
+                     'position': (100, 880),
+                     'font': os.path.join(fonts_path, 'GmarketSansTTFBold.ttf'),
+                     'font-size': 100,
+                     'font-color': '#363D62'
                      },
-
+                    # 카테고리
+                    {'text': str(row['6']) ,
+                     'position': (80, 50),
+                     'font': os.path.join(fonts_path, 'GmarketSansTTFBold.ttf'),
+                     'font-size': 110,
+                     'font-color': '#363D62'
+                     },
                 ]
 
                 # 모든 텍스트 추가
