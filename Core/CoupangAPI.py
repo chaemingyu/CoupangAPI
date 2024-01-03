@@ -407,32 +407,50 @@ class CoupangAPI(CommonAPI):
         folder_selected = filedialog.askdirectory()  # 폴더 선택기 열기
 
         if folder_selected:
+            # 현재 스크립트 파일의 경로를 얻습니다.
+            script_dir = os.path.dirname(__file__)
+            # res 폴더의 부모 디렉토리로 이동하여 intro.mp4 파일의 전체 경로 설정
+            intro_path = os.path.join(script_dir, '..', 'res', 'intro.mp4')
+
             image_folder = folder_selected
             video_name = os.path.join(image_folder, 'video.avi')
+
+            # intro.mp4 파일을 읽어와서 동영상 객체 생성
+            intro_video = cv2.VideoCapture(intro_path)
+            intro_frame_rate = int(intro_video.get(cv2.CAP_PROP_FPS))
+            intro_frame_width = int(intro_video.get(cv2.CAP_PROP_FRAME_WIDTH))
+            intro_frame_height = int(intro_video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            # 비디오 생성을 위한 VideoWriter 설정
+            fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+            video = cv2.VideoWriter(video_name, fourcc, intro_frame_rate, (intro_frame_width, intro_frame_height))
+
+            # intro.mp4 파일 프레임 추가
+            while True:
+                ret, frame = intro_video.read()
+                if not ret:
+                    break
+                video.write(frame)
 
             # 이미지 폴더에서 이미지 목록을 가져옵니다.
             images = [img for img in os.listdir(image_folder) if img.endswith(".jpg") or img.endswith(".png")]
 
             if len(images) > 0:
-                # 첫 번째 이미지에서 프레임 크기 정보를 가져옵니다.
-                frame = cv2.imread(os.path.join(image_folder, images[0]))
-                height, width, layers = frame.shape
-
-                # 비디오를 생성합니다.
-                fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-                #프레임 속도 조절
-                video = cv2.VideoWriter(video_name, fourcc, 1/6, (width, height))
-
-                # 각 이미지를 읽어서 비디오에 추가합니다.
+                # 각 이미지를 읽어서 비디오에 추가합니다. (각 이미지를 6초 동안 표시)
                 for image in reversed(images):
                     img_path = os.path.join(image_folder, image)
                     img = cv2.imread(img_path)
-                    video.write(img)
 
-                # 비디오 라이터를 해제합니다.
-                video.release()
+                    # 이미지를 6초 동안 프레임으로 추가
+                    for _ in range(6 * intro_frame_rate):
+                        video.write(img)
+
                 print("비디오 생성이 완료되었습니다.")
             else:
                 print("폴더에 이미지 파일이 없습니다.")
+
+            # 비디오 라이터를 해제합니다.
+            video.release()
+            intro_video.release()
         else:
             print("폴더를 선택하지 않았습니다.")
