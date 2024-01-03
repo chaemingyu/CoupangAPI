@@ -400,4 +400,39 @@ class CoupangAPI(CommonAPI):
                 # 이미지 저장
                 cv2.imwrite(output_image_path, TemplateImage)
 
+    def CreateVideo(self):
+        root = tk.Tk()
+        root.withdraw()  # Tk 창 숨기기
 
+        folder_selected = filedialog.askdirectory()  # 폴더 선택기 열기
+
+        if folder_selected:
+            image_folder = folder_selected
+            video_name = os.path.join(image_folder, 'video.avi')
+
+            # 이미지 폴더에서 이미지 목록을 가져옵니다.
+            images = [img for img in os.listdir(image_folder) if img.endswith(".jpg") or img.endswith(".png")]
+
+            if len(images) > 0:
+                # 첫 번째 이미지에서 프레임 크기 정보를 가져옵니다.
+                frame = cv2.imread(os.path.join(image_folder, images[0]))
+                height, width, layers = frame.shape
+
+                # 비디오를 생성합니다.
+                fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+                #프레임 속도 조절
+                video = cv2.VideoWriter(video_name, fourcc, 1/6, (width, height))
+
+                # 각 이미지를 읽어서 비디오에 추가합니다.
+                for image in reversed(images):
+                    img_path = os.path.join(image_folder, image)
+                    img = cv2.imread(img_path)
+                    video.write(img)
+
+                # 비디오 라이터를 해제합니다.
+                video.release()
+                print("비디오 생성이 완료되었습니다.")
+            else:
+                print("폴더에 이미지 파일이 없습니다.")
+        else:
+            print("폴더를 선택하지 않았습니다.")

@@ -15,8 +15,10 @@ class MainWindow(QMainWindow):
         loadUi('D:/CoupangAPI/mainwindow.ui', self)
         self.inibtn.clicked.connect(self.IniBtnClick)
         self.searchbtn.clicked.connect(self.SerachBtnClick)
-        self.searchbtn.clicked.connect(self.SerachBtnClick)
         self.createimagbtn.clicked.connect(self.CreateImgBtnClick)
+        self.createvideobtn.clicked.connect(self.CreateVideoBtnClick)
+
+
         # QTextEdit 위젯 생성
         self.log.setReadOnly(True)  # 읽기 전용 모드로 설정하여 사용자 입력 방지
         self.log.setFontFamily("Courier")  # 특정 폰트로 설정 (예: Courier)
@@ -80,6 +82,11 @@ class MainWindow(QMainWindow):
     def CreateImgBtnClick(self):
         self.coupang.CreateImage()
         self.Append_log("이미지 생성 완료")
+        pass
+
+    def CreateVideoBtnClick(self):
+        self.coupang.CreateVideo()
+        self.Append_log("동영상 생성 완료")
         pass
 
 if __name__ == "__main__":
