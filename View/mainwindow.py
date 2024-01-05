@@ -4,7 +4,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 import Common
 from Core.CoupangAPI import CoupangAPI  # Core 패키지 내의 CoupangAPI 모듈을 가져옵니다.
-from PyQt5.QtCore import QStringListModel, QModelIndex,Qt
+from Core.YoutubeAPI import YoutubeAPI  # Core 패키지 내의 YoutubeAPI 모듈을 가져옵니다.
+import tkinter as tk
+from tkinter import filedialog
 class MainWindow(QMainWindow):
 
     category = None
@@ -12,11 +14,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        loadUi('D:/CoupangAPI/mainwindow.ui', self)
+        loadUi('C:/fork/CoupangAPI/mainwindow.ui', self)
         self.inibtn.clicked.connect(self.IniBtnClick)
         self.searchbtn.clicked.connect(self.SerachBtnClick)
         self.createimagbtn.clicked.connect(self.CreateImgBtnClick)
         self.createvideobtn.clicked.connect(self.CreateVideoBtnClick)
+        self.youtubeuploadbtn.clicked.connect(self.YouubeUploadBtnClick)
 
 
         # QTextEdit 위젯 생성
@@ -50,6 +53,7 @@ class MainWindow(QMainWindow):
         self.shoppingtableView.clicked.connect(self.onTableClicked)
 
         self.coupang = CoupangAPI.GetInstance()
+        self.youtube = YoutubeAPI.GetInstance()
 
     def IniBtnClick(self):
 
@@ -88,6 +92,17 @@ class MainWindow(QMainWindow):
         self.coupang.CreateVideo()
         self.Append_log("동영상 생성 완료")
         pass
+
+    def YouubeUploadBtnClick(self):
+        root = tk.Tk()
+        root.withdraw()  # tkinter 창 숨기기
+
+        file_path = filedialog.askopenfilename()
+
+        self.youtube.UploadVideo(file_path)
+        self.Append_log("유튜브 업로드 완료")
+        pass
+
 
 if __name__ == "__main__":
     # coupang = CoupangAPI.GetInstance()

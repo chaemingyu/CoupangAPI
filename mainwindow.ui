@@ -112,6 +112,19 @@
      <string>동영상생성</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="youtubeuploadbtn">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>270</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>유튜브업로드</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -119,7 +132,7 @@
      <x>0</x>
      <y>0</y>
      <width>620</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
