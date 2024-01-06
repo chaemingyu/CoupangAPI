@@ -97,10 +97,10 @@ class MainWindow(QMainWindow):
 
         file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         # 이미지를 저장할 디렉토리 경로 추출
-
-        self.youtube.CreateScript(file_path)
+        description = self.youtube.CreateDescription(file_path)
+        self.youtube.CreateScript(file_path, description)
         #설명 생성
-        self.youtube.CreateDescription(file_path)
+
         self.Append_log("스크립트 생성 완료")
         pass
 

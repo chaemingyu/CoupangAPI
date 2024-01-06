@@ -46,12 +46,14 @@ class YoutubeAPI:
         # print(read_data)  # 읽어온 데이터 출력
         pass
 
-    def CreateScript(self, file_path):
+    def CreateScript(self, file_path ,description = None):
         output_directory = os.path.dirname(file_path)
+        file_name = os.path.basename(file_path)  # 파일 이름 가져오기
+        file_name_without_extension = os.path.splitext(file_name)[0]  # 확장자를 제외한 파일 이름 추출
 
         data = {
-            "title": "공개 이미지",
-            "description": "테스트 설명",
+            "title": f"{file_name_without_extension} Top10!! 요즘 인기있는 {file_name_without_extension} 구매 가격 평점 후기 비교 총정리!!",
+            "description": self.ReadDescription(description),
             "tags": ["쿠팡", "테스트", "완료"],
             "categoryId": "22",
             "privacyStatus": "public",
@@ -63,7 +65,11 @@ class YoutubeAPI:
 
     def CreateDescription(self, file_path):
         output_directory = os.path.dirname(file_path)
-        script_template = "❤️❤️❤️ 요즘 인기있는 샤오미로봇청소기 구매 가격 평점 후기 비교 총정리해 보았어요!!\n\n"
+
+        file_name = os.path.basename(file_path)  # 파일 이름 가져오기
+        file_name_without_extension = os.path.splitext(file_name)[0]  # 확장자를 제외한 파일 이름 추출
+
+        script_template = f"❤️❤️❤️ 요즘 인기있는 {file_name_without_extension} 구매 가격 평점 후기 비교 총정리해 보았어요!!\n\n"
 
         if file_path:
             csv_data = CSVManager.ReadCsvFile(file_path)
@@ -78,13 +84,13 @@ class YoutubeAPI:
 
                 script_template += f"❤️❤️❤️ [{time}] {rank}위. {hashtag} {product} [{price}] 💙구매링크👉{link}\n"
 
-        script_template += "❤️상품품절시 구매링크👉https://link.coupang.com/a/5PTJb #샤오미로봇청소기추천 #샤오미로봇청소기가격 #샤오미로봇청소기후기 #샤오미로봇청소기순위 #가성비샤오미로봇청소기 #최저가샤오미로봇청소기 이 포스팅은 쿠팡파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
+            script_template += "❤️상품품절시 구매링크👉https://link.coupang.com/a/5PTJb #샤오미로봇청소기추천 #샤오미로봇청소기가격 #샤오미로봇청소기후기 #샤오미로봇청소기순위 #가성비샤오미로봇청소기 #최저가샤오미로봇청소기 이 포스팅은 쿠팡파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
 
-        # 최종 파일 경로
-        output_file_path = os.path.join(output_directory, "description.txt")
+            # 최종 파일 경로
+            output_file_path = os.path.join(output_directory, "description.txt")
+            CommonUtils.SaveTextFile(script_template,output_file_path)
 
-        # 스크립트 템플릿을 파일로 저장
-        with open(output_file_path, 'w', encoding='utf-8') as file:
-            file.write(script_template)
+            return output_file_path
 
-        print(f"생성된 텍스트 파일 경로: {output_file_path}")
+    def ReadDescription(self, file_path):
+        return CommonUtils.ReadTextFile(file_path)
