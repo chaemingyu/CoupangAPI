@@ -23,4 +23,16 @@ class YoutubeAPI:
     def UploadVideo(self, filepath):
         if not self.uploader:
             self.Initialize()
-        self.uploader.upload(filepath)
+
+        self.uploader.upload(filepath,self.to_dict())
+
+    def to_dict(self):
+        return {
+                "title": "공개 이미지",
+                "description": "테스트 설명",
+                "tags": ["쿠팡", "테스트", "완료"],
+                "categoryId": "22",
+                "privacyStatus": "public",
+                "kids": False,
+                "thumbnailLink": "https://cdn.havecamerawilltravel.com/photographer/files/2020/01/youtube-logo-new-1068x510.jpg"
+            }

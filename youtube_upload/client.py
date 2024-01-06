@@ -141,18 +141,18 @@ class YoutubeUploader():
             http=self.credentials.authorize(
                 httplib2.Http()))
 
-    def upload(self, file_path, options=None, chunksize=(-1)):
+    def upload(self, file_path, options, chunksize=(-1)):
 
-        # Video options
-        options = {
-            "title": "테스트",
-            "description": "테스트 설명",
-            "tags": ["쿠팡", "테스트", "완료"],
-            "categoryId": "22",
-            "privacyStatus": "private",
-            "kids": False,
-            "thumbnailLink": "https://cdn.havecamerawilltravel.com/photographer/files/2020/01/youtube-logo-new-1068x510.jpg"
-        }
+        # # Video options
+        # options = {
+        #     "title": "테스트",
+        #     "description": "테스트 설명",
+        #     "tags": ["쿠팡", "테스트", "완료"],
+        #     "categoryId": "22",
+        #     "privacyStatus": "private",
+        #     "kids": False,
+        #     "thumbnailLink": "https://cdn.havecamerawilltravel.com/photographer/files/2020/01/youtube-logo-new-1068x510.jpg"
+        # }
 
         '''
         This uploads the file to YouTube. The only required argument is the `file_path`, which is the path to the video to be uploaded.
