@@ -20,6 +20,7 @@ from Common import  Config
 from PIL import Image, ImageDraw, ImageFont
 import tkinter as tk
 from tkinter import filedialog
+from moviepy.editor import VideoFileClip, AudioFileClip
 
 class CoupangAPI(CommonAPI):
 
@@ -411,6 +412,7 @@ class CoupangAPI(CommonAPI):
             script_dir = os.path.dirname(__file__)
             # res 폴더의 부모 디렉토리로 이동하여 intro.mp4 파일의 전체 경로 설정
             intro_path = os.path.join(script_dir, '..', 'res', 'intro.mp4')
+            bgm_path = os.path.join(script_dir, '..', 'res', 'bgm.mp3')
 
             image_folder = folder_selected
             video_name = os.path.join(image_folder, 'video.avi')
@@ -452,5 +454,19 @@ class CoupangAPI(CommonAPI):
             # 비디오 라이터를 해제합니다.
             video.release()
             intro_video.release()
+
+            # BGM을 추가하여 새로운 동영상 생성
+            output_video_path = os.path.join(image_folder, 'resuit.mp4')
+            self.add_bgm_to_video(video_name, bgm_path, output_video_path)
         else:
             print("폴더를 선택하지 않았습니다.")
+
+    def add_bgm_to_video(self, video_path, bgm_path, output_path):
+        video_clip = VideoFileClip(video_path)
+        bgm_clip = AudioFileClip(bgm_path)
+
+        # 비디오와 BGM을 합성하여 새로운 비디오 클립 생성
+        final_clip = video_clip.set_audio(bgm_clip)
+
+        # 새로운 동영상 파일로 저장
+        final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac')
