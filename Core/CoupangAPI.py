@@ -470,3 +470,7 @@ class CoupangAPI(CommonAPI):
 
         # 새로운 동영상 파일로 저장
         final_clip.write_videofile(output_path, codec='libx264', audio_codec='aac')
+
+
+
+

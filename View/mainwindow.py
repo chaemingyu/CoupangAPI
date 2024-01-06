@@ -19,6 +19,9 @@ class MainWindow(QMainWindow):
         self.searchbtn.clicked.connect(self.SerachBtnClick)
         self.createimagbtn.clicked.connect(self.CreateImgBtnClick)
         self.createvideobtn.clicked.connect(self.CreateVideoBtnClick)
+
+        self.createscrpitbtn.clicked.connect(self.CreateScriptBtnClick)
+
         self.youtubeuploadbtn.clicked.connect(self.YouubeUploadBtnClick)
 
 
@@ -86,6 +89,19 @@ class MainWindow(QMainWindow):
     def CreateImgBtnClick(self):
         self.coupang.CreateImage()
         self.Append_log("이미지 생성 완료")
+        pass
+
+    def CreateScriptBtnClick(self):
+        root = tk.Tk()
+        root.withdraw()  # tkinter 창 숨기기
+
+        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        # 이미지를 저장할 디렉토리 경로 추출
+
+        self.youtube.CreateScript(file_path)
+        #설명 생성
+        self.youtube.CreateDescription(file_path)
+        self.Append_log("스크립트 생성 완료")
         pass
 
     def CreateVideoBtnClick(self):
