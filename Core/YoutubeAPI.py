@@ -1,8 +1,11 @@
 from youtube_upload.client import YoutubeUploader
 from Utils import  CommonUtils, CSVManager
 import os
+import csv
 from datetime import datetime
-
+import ast
+import tkinter as tk
+from tkinter import filedialog
 class YoutubeAPI:
     _instance = None
 
@@ -26,25 +29,42 @@ class YoutubeAPI:
     def UploadVideo(self, filepath):
         if not self.uploader:
             self.Initialize()
+        data = self.ReadScript(filepath)
+        self.uploader.upload(filepath,data)
 
-        self.uploader.upload(filepath,self.to_dict())
+    # def to_dict(self):
+    #     return {
+    #             "title": "공개 이미지",
+    #             "description": "테스트 설명",
+    #             "tags": ["쿠팡", "테스트", "완료"],
+    #             "categoryId": "22",
+    #             "privacyStatus": "public",
+    #             "kids": False,
+    #             "thumbnailLink": "https://cdn.havecamerawilltravel.com/photographer/files/2020/01/youtube-logo-new-1068x510.jpg"
+    #         }
 
-    def to_dict(self):
-        return {
-                "title": "공개 이미지",
-                "description": "테스트 설명",
-                "tags": ["쿠팡", "테스트", "완료"],
-                "categoryId": "22",
-                "privacyStatus": "public",
-                "kids": False,
-                "thumbnailLink": "https://cdn.havecamerawilltravel.com/photographer/files/2020/01/youtube-logo-new-1068x510.jpg"
-            }
+    def ReadScript(self, filepath):
+        folder_path, filename = os.path.split(filepath)
+        if folder_path:
+            script_path = os.path.join(folder_path, 'script.csv')
 
-    def ReadScript(self, file_path):
-        # CSV 파일에서 데이터 읽기
-        # read_data = CommonUtils.read_from_csv(os.path.join(output_directory, 'data.csv'))
-        # print(read_data)  # 읽어온 데이터 출력
-        pass
+            data_dict = {}  # CSV 파일에서 읽은 데이터를 저장할 딕셔너리
+
+            with open(script_path, newline='', encoding='utf-8') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for index, row in enumerate(reader):
+                    # 읽은 각 행의 데이터를 to_dict 형식에 맞게 변환하여 딕셔너리에 추가
+                    data_dict[index] = {
+                        "title": row["title"],
+                        "description": row["description"],
+                        "tags": ast.literal_eval(row["tags"]),  # 문자열 리스트를 파이썬 리스트로 변환
+                        "categoryId": row["categoryId"],
+                        "privacyStatus": row["privacyStatus"],
+                        "kids": row["kids"] == "True",
+                        "thumbnailLink": row["thumbnailLink"]
+                    }
+
+        return data_dict
 
     def CreateScript(self, file_path ,description = None):
         output_directory = os.path.dirname(file_path)

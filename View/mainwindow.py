@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
 
         self.createscrpitbtn.clicked.connect(self.CreateScriptBtnClick)
 
-        self.youtubeuploadbtn.clicked.connect(self.YouubeUploadBtnClick)
+        self.youtubeuploadbtn.clicked.connect(self.YoutubeUploadBtnClick)
 
 
         # QTextEdit 위젯 생성
@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
         self.Append_log("동영상 생성 완료")
         pass
 
-    def YouubeUploadBtnClick(self):
+    def YoutubeUploadBtnClick(self):
         root = tk.Tk()
         root.withdraw()  # tkinter 창 숨기기
 
