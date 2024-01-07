@@ -185,14 +185,14 @@ class YoutubeUploader():
             options = {}
         body = {
             'snippet': {
-                'title': options.get('title', 'Test Title'),
-                'description': options.get('description', 'Test Description'),
-                'tags': options.get('tags'),
-                'categoryId': options.get('category', '22')
+                'title': options[0].get('title', 'Test Title'),
+                'description': options[0].get('description', 'Test Description'),
+                'tags': options[0].get('tags'),
+                'categoryId': options[0].get('category', '22')
             },
             'status': {
-                'privacyStatus': options.get('privacyStatus', VALID_PRIVACY_STATUSES[0]),
-                'selfDeclaredMadeForKids': options.get('kids', False)
+                'privacyStatus': options[0].get('privacyStatus', VALID_PRIVACY_STATUSES[0]),
+                'selfDeclaredMadeForKids': options[0].get('kids', False)
             }
         }
 
